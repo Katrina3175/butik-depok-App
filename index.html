@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi RKI Kota Depok</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans p-6">
+
+    <div class="max-w-6xl mx-auto space-y-8">
+        
+        <header class="bg-blue-600 text-white p-6 rounded-xl shadow-lg text-center">
+            <h1 class="text-3xl font-bold">Portal Data RKI Kota Depok</h1>
+            <p class="mt-2 text-blue-100">Sistem Informasi Pengelolaan Rumah Keluarga Indonesia di 11 Kecamatan</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+                <h2 class="text-xl font-bold mb-4 text-blue-700 border-b pb-2">1. Input Data Pokok Titik RKI</h2>
+                <form id="formPokok" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Nomor ID Titik RKI</label>
+                        <input type="text" id="idRki" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Nama PJ RKI</label>
+                        <input type="text" id="namaPj" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Alamat Titik RKI</label>
+                        <textarea id="alamatRki" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Kecamatan (Untuk Peta)</label>
+                        <select id="kecamatanRki" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="">-- Pilih Kecamatan di Depok --</option>
+                            <option value="-6.3700,106.8200">Beji</option>
+                            <option value="-6.3900,106.7400">Bojongsari</option>
+                            <option value="-6.4400,106.8300">Cilodong</option>
+                            <option value="-6.3700,106.8600">Cimanggis</option>
+                            <option value="-6.3300,106.7800">Cinere</option>
+                            <option value="-6.4300,106.8000">Cipayung</option>
+                            <option value="-6.3600,106.7800">Limo</option>
+                            <option value="-6.4000,106.8100">Pancoran Mas</option>
+                            <option value="-6.4000,106.7600">Sawangan</option>
+                            <option value="-6.3900,106.8400">Sukmajaya</option>
+                            <option value="-6.4100,106.8700">Tapos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Jumlah Peserta Terdaftar</label>
+                        <input type="number" id="jumlahPesertaPokok" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition">Simpan Data Pokok</button>
+                </form>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+                <h2 class="text-xl font-bold mb-4 text-emerald-700 border-b pb-2">2. Input Data Kegiatan Reguler</h2>
+                <form id="formReguler" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Pilih ID Titik RKI</label>
+                        <select id="selectIdRki" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option value="">-- Daftarkan Data Pokok Dulu --</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Hari</label>
+                            <input type="text" id="hariKegiatan" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Tanggal</label>
+                            <input type="date" id="tanggalKegiatan" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Waktu Pelaksanaan</label>
+                        <input type="time" id="waktuKegiatan" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Bentuk Kegiatan</label>
+                        <input type="text" id="bentukKegiatan" required placeholder="Contoh: Taklim, Pelatihan Lifeskill" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Jumlah Peserta Hadir</label>
+                        <input type="number" id="jumlahPesertaReguler" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Dokumentasi (Foto)</label>
+                        <input type="file" id="dokumentasi" accept="image/*" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-2 rounded hover:bg-emerald-700 transition">Simpan Data Kegiatan</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+            <h2 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2">3. Peta Sebaran Titik RKI Kota Depok</h2>
+            <div id="map" class="h-96 w-full rounded border z-0"></div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="text-xl font-bold text-slate-800">4. Rekap Data & Laporan</h2>
+                <div class="space-x-2">
+                    <button onclick="exportToExcel()" class="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700">Export Excel</button>
+                    <button onclick="exportToPDF()" class="bg-red-600 text-white px-4 py-2 rounded font-semibold hover:bg-red-700">Export PDF</button>
+                </div>
+            </div>
+            
+            <h3 class="font-bold mt-4 mb-2 text-blue-700">Tabel Data Pokok RKI</h3>
+            <div class="overflow-x-auto mb-6">
+                <table class="w-full text-left border-collapse" id="tablePokok">
+                    <thead>
+                        <tr class="bg-blue-100 border-b-2 border-blue-200">
+                            <th class="p-2 border">ID RKI</th>
+                            <th class="p-2 border">Nama PJ</th>
+                            <th class="p-2 border">Alamat</th>
+                            <th class="p-2 border">Jumlah Peserta</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyPokok">
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="font-bold mt-4 mb-2 text-emerald-700">Tabel Data Kegiatan Reguler</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse" id="tableReguler">
+                    <thead>
+                        <tr class="bg-emerald-100 border-b-2 border-emerald-200">
+                            <th class="p-2 border">ID RKI</th>
+                            <th class="p-2 border">Waktu</th>
+                            <th class="p-2 border">Kegiatan</th>
+                            <th class="p-2 border">Peserta Hadir</th>
+                            <th class="p-2 border">Dokumentasi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyReguler">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage Sementara (Hanya aktif selama browser tidak di-refresh)
+        let dataPokokArray = [];
+        let dataRegulerArray = [];
+
+        // Inisialisasi Peta Leaflet (Titik Pusat: Kota Depok)
+        const map = L.map('map').setView([-6.4025, 106.8206], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Handle Submit Data Pokok
+        document.getElementById('formPokok').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const idRki = document.getElementById('idRki').value;
+            const namaPj = document.getElementById('namaPj').value;
+            const alamat = document.getElementById('alamatRki').value;
+            const peserta = document.getElementById('jumlahPesertaPokok').value;
+            const koordinat = document.getElementById('kecamatanRki').value.split(',');
+
+            const newData = { id: idRki, pj: namaPj, alamat: alamat, peserta: peserta };
+            dataPokokArray.push(newData);
+
+            // Update Tabel
+            document.getElementById('tbodyPokok').innerHTML += `
+                <tr class="border-b">
+                    <td class="p-2 border">${newData.id}</td>
+                    <td class="p-2 border">${newData.pj}</td>
+                    <td class="p-2 border">${newData.alamat}</td>
+                    <td class="p-2 border">${newData.peserta}</td>
+                </tr>
+            `;
+
+            // Update Dropdown Data Reguler
+            const option = document.createElement('option');
+            option.value = newData.id;
+            option.text = `${newData.id} - ${newData.pj}`;
+            document.getElementById('selectIdRki').appendChild(option);
+
+            // Tambahkan Marker ke Peta dengan sedikit randomizer agar tidak menumpuk di 1 titik kecamatan yang sama
+            const lat = parseFloat(koordinat[0]) + (Math.random() - 0.5) * 0.01;
+            const lng = parseFloat(koordinat[1]) + (Math.random() - 0.5) * 0.01;
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup(`<b>ID: ${newData.id}</b><br>PJ: ${newData.pj}<br>Peserta: ${newData.peserta}`);
+
+            this.reset();
+            alert('Data Pokok Berhasil Disimpan & Ditambahkan ke Peta!');
+        });
+
+        // Handle Submit Data Reguler
+        document.getElementById('formReguler').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('dokumentasi');
+            const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : "Tidak ada file";
+
+            const newData = {
+                id: document.getElementById('selectIdRki').value,
+                hari: document.getElementById('hariKegiatan').value,
+                tanggal: document.getElementById('tanggalKegiatan').value,
+                waktu: document.getElementById('waktuKegiatan').value,
+                kegiatan: document.getElementById('bentukKegiatan').value,
+                peserta: document.getElementById('jumlahPesertaReguler').value,
+                dokumen: fileName
+            };
+            
+            dataRegulerArray.push(newData);
+
+            // Update Tabel
+            document.getElementById('tbodyReguler').innerHTML += `
+                <tr class="border-b">
+                    <td class="p-2 border">${newData.id}</td>
+                    <td class="p-2 border">${newData.hari}, ${newData.tanggal} (${newData.waktu})</td>
+                    <td class="p-2 border">${newData.kegiatan}</td>
+                    <td class="p-2 border">${newData.peserta}</td>
+                    <td class="p-2 border text-sm italic">${newData.dokumen}</td>
+                </tr>
+            `;
+
+            this.reset();
+            alert('Data Kegiatan Berhasil Disimpan!');
+        });
+
+        // Fungsi Export Excel
+        function exportToExcel() {
+            if(dataPokokArray.length === 0 && dataRegulerArray.length === 0) {
+                alert('Belum ada data untuk diexport!'); return;
+            }
+            const wb = XLSX.utils.book_new();
+            const wsPokok = XLSX.utils.json_to_sheet(dataPokokArray);
+            const wsReguler = XLSX.utils.json_to_sheet(dataRegulerArray);
+            
+            XLSX.utils.book_append_sheet(wb, wsPokok, "Data Pokok RKI");
+            XLSX.utils.book_append_sheet(wb, wsReguler, "Data Kegiatan Reguler");
+            
+            XLSX.writeFile(wb, "Rekap_Data_RKI_Depok.xlsx");
+        }
+
+        // Fungsi Export PDF
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.text("Laporan Data Rumah Keluarga Indonesia (RKI) Depok", 14, 15);
+            
+            doc.text("1. Data Pokok RKI", 14, 25);
+            doc.autoTable({
+                startY: 30,
+                head: [['ID RKI', 'Nama PJ', 'Alamat', 'Jml Peserta']],
+                body: dataPokokArray.map(d => [d.id, d.pj, d.alamat, d.peserta]),
+            });
+
+            const finalY = doc.lastAutoTable.finalY || 30;
+            doc.text("2. Data Kegiatan Reguler", 14, finalY + 10);
+            doc.autoTable({
+                startY: finalY + 15,
+                head: [['ID RKI', 'Tanggal/Waktu', 'Kegiatan', 'Hadir']],
+                body: dataRegulerArray.map(d => [d.id, `${d.hari}, ${d.tanggal} ${d.waktu}`, d.kegiatan, d.peserta]),
+            });
+
+            doc.save("Laporan_RKI_Depok.pdf");
+        }
+    </script>
+</body>
+</html>
